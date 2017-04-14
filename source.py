@@ -96,18 +96,36 @@ class Machine:
 
 		return result
 
-	#
+	# правило продукций для температуры воды
 	def controller_water(self, feature):
 		actions = list()
 
 		if 'холодная' in feature:
 			actions.append('расход жидкости большой')
+
 		if 'прохладная' in feature:
 			actions.append('расход жидкости небольшой')
+
 		if 'теплая' in feature or 'не очень горячая' in feature:
 			actions.append('расход жидкости средний')
+
 		if 'горячая' in feature:
 			actions.append('расход жидкости большой')
+
+		return actions
+
+	# правило продукций для количество белья
+	def controller_weight(self, feature):
+		actions = list()
+
+		if 'мало' in feature:
+			actions.append('уровень жидкости малый')
+
+		if 'немного' in feature:
+			actions.append('уровень жидкости средний')
+
+		if 'много' in feature:
+			actions.append('уровень жидкости большой')
 
 		return actions
 
@@ -118,6 +136,14 @@ class Machine:
 		feature_water = self.sensor_water(temperature)
 		# получаем все mu веса белья
 		feature_weight = self.sensor_weight(weight)
+		# применяем правила продукций для воды
+		features = [key for key in feature_water.keys()]
+		action_water = self.controller_water(features)
+		# применяем правила продукций для белья
+		features = [key for key in feature_weight.keys()]
+		action_weight = self.controller_water(features)
+
+
 
 
 
