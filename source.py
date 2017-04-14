@@ -129,6 +129,15 @@ class Machine:
 
 		return actions
 
+	# степень истинности условий 
+	def rules(self, feature_water, feature_weight):
+		# с определением по Заде 
+		return min(feature_water, feature_weight)
+
+
+
+
+
 
 	# запуск стиральной машинки
 	def start(self, temperature, weight):
@@ -137,11 +146,10 @@ class Machine:
 		# получаем все mu веса белья
 		feature_weight = self.sensor_weight(weight)
 		# применяем правила продукций для воды
-		features = [key for key in feature_water.keys()]
-		action_water = self.controller_water(features)
+		action_water = self.controller_water(feature_water)
 		# применяем правила продукций для белья
-		features = [key for key in feature_weight.keys()]
-		action_weight = self.controller_water(features)
+		action_weight = self.controller_water(feature_weight)
+
 
 
 
