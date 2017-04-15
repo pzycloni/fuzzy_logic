@@ -21,13 +21,13 @@ class Tangent:
 			return False
 
 		if self.incline == -1:
-			return Coordinate(x, (x - self.start) / (self.end - self.start))
+			return Coordinate(x, (self.end - x) / (self.end - self.start))
 
 		if self.incline == 0:
 			return Coordinate(x, 1)
 
 		if self.incline == 1:
-			return Coordinate(x, (self.end - x) / (self.end - self.start))
+			return Coordinate(x, (x - self.start) / (self.end - self.start))
 
 	# точки касательной
 	def get_coordinates(self, step = 1):
@@ -75,9 +75,9 @@ class Figure:
 
 
 	# придаем фигуре форму незаконченой слева трапеции
-	def create_form_middle_down(self, b, c, d):
-		middle = Tangent(0, b, c)
-		down = Tangent(-1, c, d)
+	def create_form_middle_down(self, a, b, c):
+		middle = Tangent(0, a, b)
+		down = Tangent(-1, b, c)
 
 		self.tangents = [middle, down]
 		self.__set_borders()
@@ -179,8 +179,6 @@ class Machine:
 					if tangent.start <= weight and tangent.end >= weight:
 						result[figure.name] = tangent.get_coordinate(weight).y
 
-		print(result)
-
 		return result
 
 	# правило продукций для температуры воды
@@ -265,6 +263,6 @@ class Machine:
 
 if __name__ == '__main__':
 	washine = Machine()
-	washine.start(55, 1)
+	washine.start(55, 4)
 
 	#(figure.tangents[0].coordinates)
