@@ -16,6 +16,19 @@ class Tangent:
 		# все точки касательной
 		self.coordinates = self.get_coordinates()
 
+	def get_coordinate(self, x):
+		if x < self.start or x > self.end:
+			return False
+
+		if self.incline == -1:
+			return Coordinate(x, (x - self.start) / (self.end - self.start))
+
+		if self.incline == 0:
+			return Coordinate(x, 1)
+
+		if self.incline == 1:
+			return Coordinate(x, (self.end - x) / (self.end - self.start))
+
 	# точки касательной
 	def get_coordinates(self, step = 1):
 		# все точки
@@ -39,6 +52,8 @@ class Tangent:
 		return points
 
 
+
+
 # фигура(множество), состоящая из касательных
 class Figure:
 
@@ -46,12 +61,27 @@ class Figure:
 		self.tangents = tangents
 		self.name = name
 
+		self.start, self.end = 0, 0
+
+
+	def __set_borders(self):
+		borders = list()
+
+		for tangent in self.tangents:
+			borders.append(tangent.start)
+			borders.append(tangent.end)
+
+		self.start, self.end = min(borders), max(borders)
+
+
 	# придаем фигуре форму незаконченой слева трапеции
 	def create_form_middle_down(self, b, c, d):
 		middle = Tangent(0, b, c)
 		down = Tangent(-1, c, d)
 
 		self.tangents = [middle, down]
+		self.__set_borders()
+
 
 	# придаем фигуре форму незаконченой справа трапеции
 	def create_form_middle_up(self, a, b, c):
@@ -59,6 +89,7 @@ class Figure:
 		middle = Tangent(0, b, c)
 
 		self.tangents = [up, middle]
+		self.__set_borders()
 
 	# придаем фигуре форму треугольника
 	def create_form_up_down(self, a, b, c):
@@ -66,6 +97,7 @@ class Figure:
 		down = Tangent(-1, b, c)
 
 		self.tangents = [up, down]
+		self.__set_borders()
 
 	def create_form_up_middle_down(self, a, b, c, d):
 		up = Tangent(1, a, b)
@@ -73,6 +105,7 @@ class Figure:
 		down = Tangent(-1, c, d)
 
 		self.tangents = [up, middle, down]
+		self.__set_borders()
 
 
 
@@ -81,11 +114,11 @@ class Figure:
 class Machine:
 
 	def __init__(self):
-		self.figures = list()
+		self.water_figures = self.__create_water_figures()
+		self.weight_figures = self.__create_weight_figures()
 
-		figures = self.__create_figures()
-
-	def __create_figures(self):
+	# создание фигур(нечетких множеств) температуры воды
+	def __create_water_figures(self):
 		cold = Figure('холодная')
 		cold.create_form_middle_down(0, 10, 30)
 
@@ -101,25 +134,35 @@ class Machine:
 		hot = Figure('горячая')
 		hot.create_form_middle_up(60, 70, 90)
 
+		return [cold, some_cold, warm, some_warm, hot]
+
+	# создание фигур(нечетких множеств) кол-ва белья
+	def __create_weight_figures(self):
+		few = Figure('мало')
+		few.create_form_middle_down(0, 1, 2)
+
+		some = Figure('немного')
+		some.create_form_up_middle_down(1, 2, 3, 4)
+
+		many = Figure('много')
+		many.create_form_middle_up(3, 4, 5)
+
+		return [few, some, many]
+
+
+
 	# по температуре воды определяет какая вода
 	def sensor_water(self, temperature):
 
 		result = dict()
 
-		if temperature <= 30:
-			result['холодная'] = 1 if temperature <= 10 else (30 - temperature) / (30 - 10)
+		for figure in self.water_figures:
 
-		if temperature >= 20 and temperature <= 50:
-			result['прохладная'] = (temperature - 20) / (35 - 20) if temperature <= 35 else (50 - temperature) / (50 - 35)
+			if figure.start <= temperature and figure.end >= temperature:
+				for tangent in figure.tangents:
 
-		if temperature >= 40 and temperature <= 60:
-			result['теплая'] = (temperature - 40) / (50 - 40) if temperature <= 50 else (60 - temperature) / (60 - 50)
-
-		if temperature >= 50 and temperature <= 70:
-			result['не очень горячая'] = (temperature - 50) / (60 - 50) if temperature <= 60 else (70 - temperature) / (70 - 60)
-
-		if temperature >= 60:
-			result['горячая'] = (temperature - 60) / (70 - 60) if temperature <= 70 else 1
+					if tangent.start <= temperature and tangent.end >= temperature:
+						result[figure.name] = tangent.get_coordinate(temperature).y
 
 		return result
 
@@ -128,14 +171,15 @@ class Machine:
 
 		result = dict()
 
-		if weight <= 1:
-			result['мало'] = 1 if weight <= 1 else (1 - weight) / (1 - 0)
+		for figure in self.weight_figures:
 
-		if weight >= 0.5 and weight <= 3:
-			result['немного'] = (weight - 0.5) / (1.25 - 0.5) if weight <= 1.25 else (3 - weight) / (3 - 1.25)
+			if figure.start <= weight and figure.end >= weight:
+				for tangent in figure.tangents:
 
-		if weight >= 2.5:
-			result['много'] = (weight - 2.5) / (4 - 2.5) if weight <= 4 else 1
+					if tangent.start <= weight and tangent.end >= weight:
+						result[figure.name] = tangent.get_coordinate(weight).y
+
+		print(result)
 
 		return result
 
@@ -221,13 +265,6 @@ class Machine:
 
 if __name__ == '__main__':
 	washine = Machine()
-
-	tangents = [Tangent(-1, 15, 25), 
-				Tangent(1, 5, 15)]
-
-	washine.add_figure(tangents)
-
-	figure = Figure('уменьшить', tangents)
-	washine.start(55, 3)
+	washine.start(55, 1)
 
 	#(figure.tangents[0].coordinates)
