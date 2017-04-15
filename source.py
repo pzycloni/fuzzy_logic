@@ -38,6 +38,7 @@ class Tangent:
 
 		return points
 
+
 # фигура(множество), состоящая из касательных
 class Figure:
 
@@ -45,18 +46,55 @@ class Figure:
 		self.tangents = tangents
 		self.name = name
 
+	# придаем фигуре форму незаконченой слева трапеции
+	def create_form_middle_down(self, b, c, d):
+		middle = Tangent(0, b, c)
+		down = Tangent(-1, c, d)
+
+		self.tangents = [middle, down]
+
+	# придаем фигуре форму незаконченой справа трапеции
+	def create_form_middle_up(self, a, b, c):
+		up = Tangent(1, a, b)
+		middle = Tangent(0, b, c)
+
+		self.tangents = [up, middle]
+
+	# придаем фигуре форму треугольника
+	def create_form_up_down(self, a, b, c):
+		up = Tangent(1, a, b)
+		down = Tangent(-1, b, c)
+
+		self.tangents = [up, down]
+
+	def create_form_up_middle_down(self, a, b, c, d):
+		up = Tangent(1, a, b)
+		middle = Tangent(0, b, c)
+		down = Tangent(-1, c, d)
+
+		self.tangents = [up, middle, down]
+
+
+
 
 # действия с нечеткими множествами
 class Machine:
 
 	def __init__(self):
 		self.figures = list()
-	# добавление множества
-	def add_figure(name, tangents = []):
-		# новое множество
-		figure = Figure(name, tangents)
-		# добавляем новое множество
-		self.figures.append(figure)
+
+		figures = self.__create_figures()
+
+	def __create_figures(self):
+		cold = Figure('холодная')
+
+		some_cold = Figure('прохладная')
+
+		warm = Figure('теплая')
+
+		some_wart = Figure('не очень горячая')
+		
+		hot = Figure('горячая')
 
 	# по температуре воды определяет какая вода
 	def sensor_water(self, temperature):
@@ -136,21 +174,22 @@ class Machine:
 
 
 
-
-
-
 	# запуск стиральной машинки
 	def start(self, temperature, weight):
 		# получаем все mu температуры воды
 		feature_water = self.sensor_water(temperature)
 		# получаем все mu веса белья
 		feature_weight = self.sensor_weight(weight)
+
 		# применяем правила продукций для воды
-		action_water = self.controller_water(feature_water)
+		degrees_truth_water = list()
+		# получаем степени истинности
+		degrees_truth_water = self.controller_water(feature_water)
+
 		# применяем правила продукций для белья
-		action_weight = self.controller_water(feature_weight)
-
-
+		degrees_truth_weight = list()
+		# получаем степени истинности
+		degrees_truth_weight = self.controller_weight(feature_weight)
 
 
 
@@ -162,6 +201,9 @@ if __name__ == '__main__':
 	tangents = [Tangent(-1, 15, 25), 
 				Tangent(1, 5, 15)]
 
+	washine.add_figure(tangents)
+
 	figure = Figure('уменьшить', tangents)
+	washine.start(55, 3)
 
 	#(figure.tangents[0].coordinates)
