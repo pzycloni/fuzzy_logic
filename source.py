@@ -87,14 +87,19 @@ class Machine:
 
 	def __create_figures(self):
 		cold = Figure('холодная')
+		cold.create_form_middle_down(0, 10, 30)
 
 		some_cold = Figure('прохладная')
+		some_cold.create_form_up_down(20, 35, 50)
 
 		warm = Figure('теплая')
+		warm.create_form_up_down(40, 50, 60)
 
-		some_wart = Figure('не очень горячая')
-		
+		some_warm = Figure('не очень горячая')
+		some_warm.create_form_up_down(50, 60, 70)
+
 		hot = Figure('горячая')
+		hot.create_form_middle_up(60, 70, 90)
 
 	# по температуре воды определяет какая вода
 	def sensor_water(self, temperature):
@@ -173,9 +178,28 @@ class Machine:
 		return min(feature_water, feature_weight)
 
 
+	def verification_params(self, temperature, weight):
+		if temperature > 90 or temperature < 0:
+			print('Недопустимая температура!')
+			return False
+
+		if weight > 5:
+			print('Превышен лимит количества белья!')
+			return False
+
+		if weight <= 0:
+			print('Машинка пуста!')
+			return False
+
+		return True
+
 
 	# запуск стиральной машинки
 	def start(self, temperature, weight):
+		
+		if not self.verification_params(temperature, weight):
+			return False
+
 		# получаем все mu температуры воды
 		feature_water = self.sensor_water(temperature)
 		# получаем все mu веса белья
