@@ -214,12 +214,13 @@ class Machine:
 
 		return actions
 
-	# степень истинности условий 
-	def rules(self, feature_water, feature_weight):
-		# с определением по Заде 
-		return min(feature_water, feature_weight)
+	# агрегирование подусловий правил нечеткой продукции 
+	def aggregation(self, features):
+		field = min(features, key=lambda field: features[field])
 
+		return {field: features[field]}
 
+	# проверка введеных параметров
 	def verification_params(self, temperature, weight):
 		if temperature > 90 or temperature < 0:
 			print('Недопустимая температура!')
@@ -257,12 +258,14 @@ class Machine:
 		# получаем степени истинности
 		degrees_truth_weight = self.controller_weight(feature_weight)
 
+		# агрегирование
+		mu_feature_water = self.aggregation(feature_water)
+		mu_feature_weight = self.aggregation(feature_weight)
 
-
-
+		
 
 if __name__ == '__main__':
 	washine = Machine()
-	washine.start(55, 4)
+	washine.start(55, 3.8)
 
 	#(figure.tangents[0].coordinates)
