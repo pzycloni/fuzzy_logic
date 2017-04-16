@@ -227,6 +227,12 @@ class Machine:
 
 		return {field: features[field]}
 
+	# аккумуляция подзаключений правил нечеткой продукции
+	def accumulation(self, features):
+		field = max(features, key=lambda field: features[field])
+
+		return {field: features[field]}
+
 
 	# проверка введеных параметров
 	def verification_params(self, temperature, weight):
@@ -272,7 +278,19 @@ class Machine:
 		# активизация подзаключений правил нечеткой продукции
 		mu_degrees_weight = self.aggregation(degrees_truth_weight)
 
-		
+		mu_water = dict()
+		# добавляем в словарь, для того чтобы сравнить
+		mu_water.update(mu_degrees_water)
+		mu_water.update(mu_feature_water)
+		# аккумуляция подзаключений правил нечеткой продукции
+		result_mu_water = self.accumulation(mu_water)
+		# добавляем в словарь, для того чтобы сравнить
+		mu_weight = dict()
+		mu_weight.update(mu_degrees_weight)
+		mu_weight.update(mu_feature_weight)
+		# аккумуляция подзаключений правил нечеткой продукции
+		result_mu_weight = self.accumulation(mu_weight)
+
 
 
 
