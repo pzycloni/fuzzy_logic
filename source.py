@@ -183,34 +183,34 @@ class Machine:
 
 	# правило продукций для температуры воды
 	def controller_water(self, feature):
-		actions = list()
+		actions = dict()
 
 		if 'холодная' in feature:
-			actions.append('расход жидкости большой')
+			actions['расход жидкости большой'] = 1
 
 		if 'прохладная' in feature:
-			actions.append('расход жидкости небольшой')
+			actions['расход жидкости небольшой'] = 0.5
 
 		if 'теплая' in feature or 'не очень горячая' in feature:
-			actions.append('расход жидкости средний')
+			actions['расход жидкости средний'] = 0.25
 
 		if 'горячая' in feature:
-			actions.append('расход жидкости большой')
+			actions['расход жидкости малый'] = 0
 
 		return actions
 
 	# правило продукций для количество белья
 	def controller_weight(self, feature):
-		actions = list()
+		actions = dict()
 
 		if 'мало' in feature:
-			actions.append('уровень жидкости малый')
+			actions['уровень жидкости малый'] = 0.75
 
 		if 'немного' in feature:
-			actions.append('уровень жидкости средний')
+			actions['уровень жидкости средний'] = 0.25
 
 		if 'много' in feature:
-			actions.append('уровень жидкости большой')
+			actions['уровень жидкости большой'] = 0
 
 		return actions
 
@@ -219,6 +219,14 @@ class Machine:
 		field = min(features, key=lambda field: features[field])
 
 		return {field: features[field]}
+
+
+	# активизация подусловий правил нечеткой продукции 
+	def activisation(self, features):
+		field = min(features, key=lambda field: features[field])
+
+		return {field: features[field]}
+
 
 	# проверка введеных параметров
 	def verification_params(self, temperature, weight):
@@ -248,24 +256,29 @@ class Machine:
 		# получаем все mu веса белья
 		feature_weight = self.sensor_weight(weight)
 
-		# применяем правила продукций для воды
-		degrees_truth_water = list()
+		# активизация
+		mu_feature_water = self.activisation(feature_water)
+		mu_feature_weight = self.activisation(feature_weight)
+
+		degrees_truth_water = dict()
 		# получаем степени истинности
 		degrees_truth_water = self.controller_water(feature_water)
+		# активизация подзаключений правил нечеткой продукции
+		mu_degrees_water = self.aggregation(degrees_truth_water)
 
-		# применяем правила продукций для белья
-		degrees_truth_weight = list()
+		degrees_truth_weight = dict()
 		# получаем степени истинности
 		degrees_truth_weight = self.controller_weight(feature_weight)
-
-		# агрегирование
-		mu_feature_water = self.aggregation(feature_water)
-		mu_feature_weight = self.aggregation(feature_weight)
+		# активизация подзаключений правил нечеткой продукции
+		mu_degrees_weight = self.aggregation(degrees_truth_weight)
 
 		
 
+
+
+
 if __name__ == '__main__':
 	washine = Machine()
-	washine.start(55, 3.8)
+	washine.start(55, 2)
 
 	#(figure.tangents[0].coordinates)
